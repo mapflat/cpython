@@ -188,6 +188,7 @@ static void drop_gil(PyThreadState *tstate)
 #endif
 }
 
+// Here it is. On second thoughts, better leave it as it is.
 static void take_gil(PyThreadState *tstate)
 {
     int err;
