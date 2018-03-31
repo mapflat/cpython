@@ -1,3 +1,142 @@
+Pythebo - Performance boosted and climate smart Python for AI and blockchains
+=============================================================================
+
+*Latest release: 2018-04-01*
+
+Pythebo is a variant of Python specifically performance boosted for deep learning and blockchain
+computations, by sacrificing some computational precision. While this is in appropriate for many
+applications, deep learning neural networks and blockchain ledgers are naturally resistent to
+computational errors, and the improved performance results in a significant net gain. Given Python's
+popularity in AI research, we expect Pythebo to accelerate the path to general AI by several
+years. Moreover, since the total blockchain energy consumption corresponds to the carbon footprint
+of a small country, and 7% of blockchain ledger verifications use Python, changing to Pythebo for
+blockchain ledger verification could save energy consumption equivalent to that of the city of
+Amsterdam.
+
+
+Fast and wrong > slow and right
+-------------------------------
+
+Pythebo gains significant performance on multithreaded machines by disabling the global interpreter
+lock (GIL). Disabling the GIL enables the Python interpreter to use multiple cores at the cost of
+sacrificing computational precision. Since parallel data structures are not protected by the GIL,
+there is a slight risk of incorrect computations. Due to the fuzzy nature and iterative training of
+deep learning neural networks, this is an acceptable risk, which can be compensated by extra
+training rounds. On multicore machines, the released parallelism more than compensates the risk,
+resulting in significantly shorter training cycles. Incorrect computations are corrected by later
+training rounds, and the resulting model is only flawed if there is an unlikely miscomputation in
+the last training round. We have observed close to linear speedup on the most common machine
+learning models, with < 0.1% loss of model precision.
+
+Pythebo is also applicable for blockchain computations, such as Bitcoin mining. In this case, the
+computation is invalid if there is a miscomputation. Blockchain ledgers are verified thousands of
+times by different implementations, however, so an incorrect computation will be corrected by other
+machines that repeat the computation. Again, the increased speed in computation results in a
+significant net gain in blockchain computational power. 
+
+Performance gains
+-----------------
+
+Initial measurements indicate consistent speedups for many machine learning algorithms, as seen in
+the table below. The numbers were measured on an 8-core machine with 64 GB memory.
+
++----------------------------+---------+----------------+
+| Benchmark                  | Speedup | Precision loss |
++============================+=========+================+
+| Neural, 1 hidden layer     |     3.1 |        < 0.01% |
++----------------------------+---------+----------------+
+| Deep learn, 3 x 20 nodes   |     4.7 |         0.06 % |
++----------------------------+---------+----------------+
+| Deep learn, 5 x 40 nodes   |     6.7 |         0.17 % |
++----------------------------+---------+----------------+
+| Deep learn, 7 x 80 nodes   |     7.8 |         0.23 % |
++----------------------------+---------+----------------+
+| Convolutional, 5 x 40 + 20 |     9.3 |         0.13 % |
++----------------------------+---------+----------------+
+| Adversarial, 2 x 3 x 20    |     5.1 |         0.42 % |
++----------------------------+---------+----------------+
+| Deep reinforcement, 5 x 40 |     6.2 |         2.12 % |
++---------------------------+---------+----------------+
+
+The superlinear speedup of the convolutional network baffled us, and we have not fully understood
+the cause. It seems like the convolutional structure turns one thread into an efficient cache
+prefetcher and execution predictor for the other threads, causing execution to run more than eight
+times faster on an 8 core processor.
+
+In the reinforcement learning benchmark, we ran a reinforcement based chess player implementation,
+with a deep learning model for estimating game position. The precision loss presented in the table
+is the increase in lost games versus an unmodified Python implementation, given that the amount of
+computation between moves is limited by search tree depth. When we limited the computation on time,
+Pythebo players won over Python players with a 18.2% margin.
+
+
+
+
+Using Pythebo
+-------------
+
+Pythebo is a modified fork of the Python trunk, and fully compatible with Python 3.6. We have not
+been able to get Canonical and RedHat to include a prebuilt distribution in repositories, however,
+since they are concerned that it will be used for security-sensitive applications by accident. You
+therefore have to build from source according to the standard Python instructions below. Clone this
+repository and checkout the tag `2018-04-01` in order to get the latest release version.
+
+Q & A
+-----
+
+For which applications are Pythebo useful?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Applications where performance gains are valuable, and an approximate answer is sufficient. Most
+machine learning applications fall into this category, but also others, such as physics
+simulations. If the end result quality is important, you can use Pythebo for explorative work, but
+we recommend validating the final result with standard Python as a safety measure.
+
+Is Pythebo applicable to all machine learning?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Pythebo is best suited for deep learning neural networks, due to the high natural parallelism. Most
+machine learning techniques can be parallelised, and therefore benefit from Pythebo. We recommend
+avoiding Pythebo for some recurrent neural networks, such as Boltzmann machines. This is due to the
+increased risk of falling out of found global minima points, which can be expensive to find again.
+
+Is Pythebo applicable to all blockchain operations?
+---------------------------------------------------
+
+Pythebo is applicable to ledger verification. Crypto currency mining, however, is a search
+operation; it is trivial to parallelise with multiple, independent processes, and does not benefit
+from Pythebo.
+
+
+How is Pythebo pronounced?
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Pie-THEE-bow
+
+Won't you just accelerate the robot apocalypse?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+While some expect the robotic future to be dystopian, we are optimistic and expect a better world
+powered by AI features. In case the pessimists are right, Pythebo will actually give us a head
+warning, since killer robots will arrive earlier, but their aim will be worse, so the human race has
+an overall higher chance of survival.
+
+If Pythebo accelerates crypto currency mining, will you destabilise the crypto markets?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There are no technical factors that can destabilise the crypto currency markets further beyond their
+current state.
+
+How can I trust your implementation?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The patch disabling the GIL is very simple. We suggest that you review it `here
+https://github.com/mapflat/pythebo/commit/259d93f56ce2d202008523342d842d92727c906a`_ before using
+Pythebo, and convince yourself about its correctness.
+
+
+
+
 This is Python version 3.8.0 alpha 0
 ====================================
 
